@@ -62,6 +62,15 @@ func Test_Problem3646(t *testing.T) {
 				result: 22,
 			},
 		},
+		{
+			name: "example 3",
+			para3646: para3646{
+				n: 4774,
+			},
+			ans3646: ans3646{
+				result: 23332,
+			},
+		},
 	}
 
 	fmt.Printf("------------------------Leetcode Problem 3646------------------------\n")
