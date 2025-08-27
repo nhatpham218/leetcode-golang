@@ -1,5 +1,11 @@
 package leetcode
 
+// MemoState represents the state for memoization
+type MemoState struct {
+	direction   int
+	hasMadeTurn bool
+}
+
 // 3459. Length of Longest V-Shaped Diagonal Segment
 func lenOfVDiagonal(grid [][]int) int {
 	if len(grid) == 0 || len(grid[0]) == 0 {
@@ -11,18 +17,12 @@ func lenOfVDiagonal(grid [][]int) int {
 	// Representing: down-right, down-left, up-left, up-right
 	dirs := [][]int{{1, 1}, {1, -1}, {-1, -1}, {-1, 1}}
 
-	// Memoization table: [row][col][direction][hasMadeTurn]
-	memo := make([][][][]int, m)
+	// Memoization table: [row][col] -> map[MemoState]int
+	memo := make([][]map[MemoState]int, m)
 	for i := range memo {
-		memo[i] = make([][][]int, n)
+		memo[i] = make([]map[MemoState]int, n)
 		for j := range memo[i] {
-			memo[i][j] = make([][]int, 4)
-			for k := range memo[i][j] {
-				memo[i][j][k] = make([]int, 2)
-				for l := range memo[i][j][k] {
-					memo[i][j][k][l] = -1
-				}
-			}
+			memo[i][j] = make(map[MemoState]int)
 		}
 	}
 
@@ -36,14 +36,11 @@ func lenOfVDiagonal(grid [][]int) int {
 			return 0
 		}
 
-		turnIndex := 0
-		if turn {
-			turnIndex = 1
-		}
+		state := MemoState{direction: direction, hasMadeTurn: !turn}
 
 		// Check memoization
-		if memo[nx][ny][direction][turnIndex] != -1 {
-			return memo[nx][ny][direction][turnIndex]
+		if val, exists := memo[nx][ny][state]; exists {
+			return val
 		}
 
 		// Continue walking in the original direction
@@ -55,7 +52,7 @@ func lenOfVDiagonal(grid [][]int) int {
 			maxStep = max(maxStep, dfs(nx, ny, newDirection, false, 2-target))
 		}
 
-		memo[nx][ny][direction][turnIndex] = maxStep + 1
+		memo[nx][ny][state] = maxStep + 1
 		return maxStep + 1
 	}
 
