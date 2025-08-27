@@ -1,73 +1,68 @@
 package leetcode
 
-// MemoState represents the state for memoization
-type MemoState struct {
-	direction   int
-	hasMadeTurn bool
-}
-
 // 3459. Length of Longest V-Shaped Diagonal Segment
 func lenOfVDiagonal(grid [][]int) int {
-	if len(grid) == 0 || len(grid[0]) == 0 {
-		return 0
-	}
+	// Four diagonal directions: down-right, down-left, up-left, up-right
+	dirs := [4][2]int{{1, 1}, {1, -1}, {-1, -1}, {-1, 1}}
 
-	m, n := len(grid), len(grid[0])
-	// Direction vectors: {1,1}, {1,-1}, {-1,-1}, {-1,1}
-	// Representing: down-right, down-left, up-left, up-right
-	dirs := [][]int{{1, 1}, {1, -1}, {-1, -1}, {-1, 1}}
+	rows, cols := len(grid), len(grid[0])
 
-	// Memoization table: [row][col] -> map[MemoState]int
-	memo := make([][]map[MemoState]int, m)
-	for i := range memo {
-		memo[i] = make([]map[MemoState]int, n)
-		for j := range memo[i] {
-			memo[i][j] = make(map[MemoState]int)
-		}
-	}
-
-	var dfs func(int, int, int, bool, int) int
-	dfs = func(cx, cy, direction int, turn bool, target int) int {
-		nx := cx + dirs[direction][0]
-		ny := cy + dirs[direction][1]
-
-		// Check boundaries and target value
-		if nx < 0 || ny < 0 || nx >= m || ny >= n || grid[nx][ny] != target {
-			return 0
-		}
-
-		state := MemoState{direction: direction, hasMadeTurn: !turn}
-
-		// Check memoization
-		if val, exists := memo[nx][ny][state]; exists {
-			return val
-		}
-
-		// Continue walking in the original direction
-		maxStep := dfs(nx, ny, direction, turn, 2-target)
-
-		// If we haven't made a turn yet, try making a clockwise 90-degree turn
-		if turn {
-			newDirection := (direction + 1) % 4
-			maxStep = max(maxStep, dfs(nx, ny, newDirection, false, 2-target))
-		}
-
-		memo[nx][ny][state] = maxStep + 1
-		return maxStep + 1
-	}
-
-	res := 0
-	// Try starting from every cell that has value 1
-	for i := range m {
-		for j := 0; j < n; j++ {
-			if grid[i][j] == 1 {
-				// Try all 4 diagonal directions
-				for direction := 0; direction < 4; direction++ {
-					res = max(res, dfs(i, j, direction, true, 2)+1)
+	// Memoization: dpCache[row][col][direction][turn_used]
+	dpCache := make([][][4][2]int, rows)
+	for row := range dpCache {
+		dpCache[row] = make([][4][2]int, cols)
+		for col := range dpCache[row] {
+			for dirIdx := range dpCache[row][col] {
+				for turnUsed := range dpCache[row][col][dirIdx] {
+					dpCache[row][col][dirIdx][turnUsed] = -1
 				}
 			}
 		}
 	}
 
-	return res
+	var dfs func(currRow, currCol, dirIdx int, canTurn bool, expected int) int
+	dfs = func(currRow, currCol, dirIdx int, canTurn bool, expected int) int {
+		nextRow := currRow + dirs[dirIdx][0]
+		nextCol := currCol + dirs[dirIdx][1]
+
+		// Boundary and value check
+		if nextRow < 0 || nextCol < 0 || nextRow >= rows || nextCol >= cols || grid[nextRow][nextCol] != expected {
+			return 0
+		}
+
+		turnIdx := 0
+		if canTurn {
+			turnIdx = 1
+		}
+
+		// Check memoization
+		if dpCache[nextRow][nextCol][dirIdx][turnIdx] != -1 {
+			return dpCache[nextRow][nextCol][dirIdx][turnIdx]
+		}
+
+		// Continue in same direction
+		maxLen := dfs(nextRow, nextCol, dirIdx, canTurn, 2-expected)
+
+		// Try clockwise turn if available
+		if canTurn {
+			clockwiseDir := (dirIdx + 1) % 4
+			maxLen = max(maxLen, dfs(nextRow, nextCol, clockwiseDir, false, 2-expected))
+		}
+
+		dpCache[nextRow][nextCol][dirIdx][turnIdx] = maxLen + 1
+		return maxLen + 1
+	}
+
+	maxResult := 0
+	for row := 0; row < rows; row++ {
+		for col := 0; col < cols; col++ {
+			if grid[row][col] == 1 {
+				for dirIdx := 0; dirIdx < 4; dirIdx++ {
+					segmentLen := dfs(row, col, dirIdx, true, 2) + 1
+					maxResult = max(maxResult, segmentLen)
+				}
+			}
+		}
+	}
+	return maxResult
 }
