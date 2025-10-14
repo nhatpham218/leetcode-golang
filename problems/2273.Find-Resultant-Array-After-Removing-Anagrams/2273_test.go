@@ -19,6 +19,18 @@ type ans2273 struct {
 	one []string
 }
 
+func equal(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func Test_Problem2273(t *testing.T) {
 
 	qs := []question2273{}
@@ -27,9 +39,12 @@ func Test_Problem2273(t *testing.T) {
 
 	for _, q := range qs {
 		t.Run(q.name, func(t *testing.T) {
-			_, p := q.ans2273, q.para2273
+			a, p := q.ans2273, q.para2273
 			output := removeAnagrams(p.words)
 			fmt.Printf("[input]: words=%v       [output]:%v\n", p.words, output)
+			if !equal(output, a.one) {
+				t.Errorf("expected %v, got %v", a.one, output)
+			}
 		})
 	}
 	fmt.Printf("\n\n\n")
