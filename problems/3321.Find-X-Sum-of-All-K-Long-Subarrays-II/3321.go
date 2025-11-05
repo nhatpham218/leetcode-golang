@@ -1,166 +1,109 @@
 package leetcode
 
-import "container/heap"
-
-type pair struct {
-	freq, val int
-}
-
-type maxHeap []pair
-
-func (h maxHeap) Len() int { return len(h) }
-func (h maxHeap) Less(i, j int) bool {
-	if h[i].freq != h[j].freq {
-		return h[i].freq > h[j].freq
-	}
-	return h[i].val > h[j].val
-}
-func (h maxHeap) Swap(i, j int)       { h[i], h[j] = h[j], h[i] }
-func (h *maxHeap) Push(x interface{}) { *h = append(*h, x.(pair)) }
-func (h *maxHeap) Pop() interface{} {
-	old := *h
-	n := len(old)
-	x := old[n-1]
-	*h = old[0 : n-1]
-	return x
-}
-
-type minHeap []pair
-
-func (h minHeap) Len() int { return len(h) }
-func (h minHeap) Less(i, j int) bool {
-	if h[i].freq != h[j].freq {
-		return h[i].freq < h[j].freq
-	}
-	return h[i].val < h[j].val
-}
-func (h minHeap) Swap(i, j int)       { h[i], h[j] = h[j], h[i] }
-func (h *minHeap) Push(x interface{}) { *h = append(*h, x.(pair)) }
-func (h *minHeap) Pop() interface{} {
-	old := *h
-	n := len(old)
-	x := old[n-1]
-	*h = old[0 : n-1]
-	return x
-}
+import (
+	"github.com/emirpasic/gods/v2/trees/redblacktree"
+)
 
 func findXSum(nums []int, k int, x int) []int64 {
-	freq := make(map[int]int)
-	top := &minHeap{}
-	rest := &maxHeap{}
-	heap.Init(top)
-	heap.Init(rest)
+	tracker := newXSumTracker(x)
+	result := []int64{}
 
-	topMap := make(map[pair]int)
-	restMap := make(map[pair]int)
-	topSum := int64(0)
-	topCnt := 0
-	ans := make([]int64, 0, len(nums)-k+1)
-
-	cleanTop := func() {
-		for top.Len() > 0 && topMap[(*top)[0]] == 0 {
-			heap.Pop(top)
+	for i := 0; i < len(nums); i++ {
+		tracker.add(nums[i])
+		if i >= k {
+			tracker.remove(nums[i-k])
+		}
+		if i >= k-1 {
+			result = append(result, tracker.getSum())
 		}
 	}
 
-	cleanRest := func() {
-		for rest.Len() > 0 && restMap[(*rest)[0]] == 0 {
-			heap.Pop(rest)
-		}
+	return result
+}
+
+type xSumTracker struct {
+	x         int
+	sum       int64
+	topX      *redblacktree.Tree[pair, struct{}]
+	remaining *redblacktree.Tree[pair, struct{}]
+	frequency map[int]int
+}
+
+type pair struct {
+	freq int
+	num  int
+}
+
+func comparePairs(a, b pair) int {
+	if a.freq != b.freq {
+		return a.freq - b.freq
+	}
+	return a.num - b.num
+}
+
+func newXSumTracker(x int) *xSumTracker {
+	return &xSumTracker{
+		x:         x,
+		sum:       0,
+		topX:      redblacktree.NewWith[pair, struct{}](comparePairs),
+		remaining: redblacktree.NewWith[pair, struct{}](comparePairs),
+		frequency: make(map[int]int),
+	}
+}
+
+func (t *xSumTracker) add(num int) {
+	if t.frequency[num] > 0 {
+		t.removePair(pair{freq: t.frequency[num], num: num})
+	}
+	t.frequency[num]++
+	t.addPair(pair{freq: t.frequency[num], num: num})
+}
+
+func (t *xSumTracker) remove(num int) {
+	t.removePair(pair{freq: t.frequency[num], num: num})
+	t.frequency[num]--
+	if t.frequency[num] > 0 {
+		t.addPair(pair{freq: t.frequency[num], num: num})
+	}
+}
+
+func (t *xSumTracker) getSum() int64 {
+	return t.sum
+}
+
+func (t *xSumTracker) addPair(p pair) {
+	if t.topX.Size() < t.x {
+		t.sum += int64(p.freq) * int64(p.num)
+		t.topX.Put(p, struct{}{})
+		return
 	}
 
-	balance := func() {
-		for topCnt < x && len(restMap) > 0 {
-			cleanRest()
-			if rest.Len() == 0 {
-				break
-			}
-			p := heap.Pop(rest).(pair)
-			restMap[p]--
-			topMap[p]++
-			heap.Push(top, p)
-			topSum += int64(p.freq) * int64(p.val)
-			topCnt++
-		}
-		for topCnt > x {
-			cleanTop()
-			p := heap.Pop(top).(pair)
-			topMap[p]--
-			restMap[p]++
-			heap.Push(rest, p)
-			topSum -= int64(p.freq) * int64(p.val)
-			topCnt--
-		}
-		for len(restMap) > 0 && topCnt > 0 {
-			cleanRest()
-			cleanTop()
-			if rest.Len() == 0 || top.Len() == 0 {
-				break
-			}
-			maxRest := (*rest)[0]
-			minTop := (*top)[0]
-			if maxRest.freq > minTop.freq || (maxRest.freq == minTop.freq && maxRest.val > minTop.val) {
-				heap.Pop(rest)
-				heap.Pop(top)
-				restMap[maxRest]--
-				topMap[minTop]--
-				topMap[maxRest]++
-				restMap[minTop]++
-				heap.Push(top, maxRest)
-				heap.Push(rest, minTop)
-				topSum += int64(maxRest.freq)*int64(maxRest.val) - int64(minTop.freq)*int64(minTop.val)
-			} else {
-				break
-			}
-		}
-	}
+	minTopX := t.topX.Left().Key
+	if comparePairs(p, minTopX) > 0 {
+		t.sum += int64(p.freq) * int64(p.num)
+		t.topX.Put(p, struct{}{})
 
-	add := func(num int) {
-		old := pair{freq[num], num}
-		if topMap[old] > 0 {
-			topMap[old]--
-			topSum -= int64(old.freq) * int64(old.val)
-			topCnt--
-		} else if restMap[old] > 0 {
-			restMap[old]--
+		toMove := t.topX.Left().Key
+		t.sum -= int64(toMove.freq) * int64(toMove.num)
+		t.topX.Remove(toMove)
+		t.remaining.Put(toMove, struct{}{})
+	} else {
+		t.remaining.Put(p, struct{}{})
+	}
+}
+
+func (t *xSumTracker) removePair(p pair) {
+	if _, found := t.topX.Get(p); found {
+		t.sum -= int64(p.freq) * int64(p.num)
+		t.topX.Remove(p)
+
+		if t.remaining.Size() > 0 {
+			maxRemaining := t.remaining.Right().Key
+			t.sum += int64(maxRemaining.freq) * int64(maxRemaining.num)
+			t.remaining.Remove(maxRemaining)
+			t.topX.Put(maxRemaining, struct{}{})
 		}
-		freq[num]++
-		newP := pair{freq[num], num}
-		restMap[newP]++
-		heap.Push(rest, newP)
-		balance()
+	} else if _, found := t.remaining.Get(p); found {
+		t.remaining.Remove(p)
 	}
-
-	remove := func(num int) {
-		old := pair{freq[num], num}
-		if topMap[old] > 0 {
-			topMap[old]--
-			topSum -= int64(old.freq) * int64(old.val)
-			topCnt--
-		} else {
-			restMap[old]--
-		}
-		freq[num]--
-		if freq[num] > 0 {
-			newP := pair{freq[num], num}
-			restMap[newP]++
-			heap.Push(rest, newP)
-		} else {
-			delete(freq, num)
-		}
-		balance()
-	}
-
-	for i := 0; i < k; i++ {
-		add(nums[i])
-	}
-	ans = append(ans, topSum)
-
-	for i := k; i < len(nums); i++ {
-		remove(nums[i-k])
-		add(nums[i])
-		ans = append(ans, topSum)
-	}
-
-	return ans
 }
