@@ -2,13 +2,13 @@
 
 
 ```
-[SPOILER="Go 19/11/2025"]
+[SPOILER="Go 20/11/2025"]
 [CODE=clike]
 
 
 [/CODE]
 [/SPOILER]
-Day 84/100
+Day 85/100
 ```
 
 ```
