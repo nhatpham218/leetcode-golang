@@ -2,15 +2,15 @@
 
 
 ```
-[SPOILER="Go 23/11/2025"]
+[SPOILER="Go 24/11/2025"]
 [CODE=clike]
 
 
 [/CODE]
 [/SPOILER]
-Day 88/100
+Day 89/100
 ```
 
 ```
-Create a folder, a solution file, and a test file for the problem above. Refer to the existing folder structure to determine the naming convention and format. Leave the solution function blank. Dont add new test cases.
+Create a folder, a solution file, and a test file for the problem above. Refer to the existing folder structure to determine the naming convention and format. Leave the solution function blank. Dont add new test cases, just keep the example as test cases.
 ```
