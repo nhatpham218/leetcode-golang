@@ -3,6 +3,7 @@ package leetcode
 import "sort"
 
 // 3661. Maximum Walls Destroyed by Robots
+// https://leetcode.com/problems/maximum-walls-destroyed-by-robots/description/
 // There is an endless straight line populated with some robots and walls. You are given integer arrays robots, distance, and walls:
 // robots[i] is the position of the ith robot.
 // distance[i] is the maximum distance the ith robot's bullet can travel.
