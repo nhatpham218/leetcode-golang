@@ -2,15 +2,17 @@
 
 
 ```
-[SPOILER="Go 05/12/2025"]
+[SPOILER="Go 06/12/2025"]
 [CODE=clike]
 
 
 [/CODE]
 [/SPOILER]
-Day 100/100
 ```
 
 ```
-Create a folder, a solution file, and a test file for the problem above. Refer to the existing folder structure to determine the naming convention and format. Leave the solution function blank. Dont add new test cases, just keep the example as test cases.
+Get today daily leetcode problem. Then: 
+    - Create a folder, a solution file, a test file and a readme file for the problem above. Can refer to the directory `problems/3661.Maximum-Walls-Destroyed-by-Robots` determine the naming convention and format. 
+    - Leave the solution function blank. 
+    - Dont add new test cases, just keep the example as test cases.
 ```
