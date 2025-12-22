@@ -8,9 +8,11 @@ Get today daily leetcode problem. Then:
 ```
 
 ```
-Reviewing the current code to optimize, clean, and improve readability
+Reviewing the current code to optimize, clean, and improve readability. Renaming variables to be clearer (keep it short if possible)
 ```
 
 ## Notes
 
 - **Go Version**: This repo uses Go 1.24.3+ which includes built-in `max()` and `min()` functions (available since Go 1.21). Do NOT create custom `max`/`min` helper functions - use the built-in ones directly.
+
+- **Don't forget test your solution before after make any changes.
