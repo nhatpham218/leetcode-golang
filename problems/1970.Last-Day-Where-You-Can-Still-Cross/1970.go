@@ -29,22 +29,11 @@ func latestDayToCross(row int, col int, cells [][]int) int {
 func canCross(grid [][]int) bool {
 	cols := len(grid[0])
 	for col := 0; col < cols; col++ {
-		if grid[0][col] == 0 && dfs(grid, 0, col) && set2To0(grid) {
+		if grid[0][col] == 0 && dfs(grid, 0, col) {
 			return true
 		}
 	}
 	return false
-}
-
-func set2To0(grid [][]int) bool {
-	for i := range grid {
-		for j := range grid[i] {
-			if grid[i][j] == 2 {
-				grid[i][j] = 0
-			}
-		}
-	}
-	return true
 }
 
 func dfs(grid [][]int, r, c int) bool {
@@ -57,6 +46,7 @@ func dfs(grid [][]int, r, c int) bool {
 	}
 
 	grid[r][c] = 2
-
-	return dfs(grid, r+1, c) || dfs(grid, r-1, c) || dfs(grid, r, c+1) || dfs(grid, r, c-1)
+	check := dfs(grid, r+1, c) || dfs(grid, r-1, c) || dfs(grid, r, c+1) || dfs(grid, r, c-1)
+	grid[r][c] = 0
+	return check
 }
