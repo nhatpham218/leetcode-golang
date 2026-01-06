@@ -12,7 +12,7 @@ type TreeNode struct {
 // https://leetcode.com/problems/maximum-level-sum-of-a-binary-tree/
 func maxLevelSum(root *TreeNode) int {
 	queue := []*TreeNode{root}
-	maxSum := -math.MinInt64
+	maxSum := math.MinInt
 	maxLevel := 0
 	level := 0
 	for len(queue) > 0 {
