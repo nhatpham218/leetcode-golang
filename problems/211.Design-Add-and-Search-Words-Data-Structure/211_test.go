@@ -38,7 +38,7 @@ func Test_Problem211(t *testing.T) {
 
 	for _, q := range qs {
 		t.Run(q.name, func(t *testing.T) {
-			wd := Constructor211()
+			wd := Constructor()
 			for i, op := range q.para211.operations {
 				var output interface{}
 				switch op {
