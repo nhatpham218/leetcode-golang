@@ -2,7 +2,7 @@
 
 ```
 Get current daily challenge leetcode. Then: 
-    - Create a folder, a solution file, a test file and a readme file for the problem above. Can refer to the directory `problems/3661.Maximum-Walls-Destroyed-by-Robots` determine the naming convention and format. 
+    - Create a folder, a solution file, a test file and a readme file for the problem above. Can refer to the directory `problems/3661.Maximum-Walls-Destroyed-by-Robots` determine the naming convention and format. Where it has problem number, use padding with 0s leading (4 numbers)
     - Leave the solution function blank. 
     - Dont add new test cases, just keep the example as test cases.
 ```
